@@ -5,6 +5,12 @@ const userSchema = mongoose.Schema(
       type: mongoose.Schema.Types.ObjectId,
       ref: "Profile",
     },
+    blogs: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Blog",
+      },
+    ],
     email: {
       type: String,
       required: [true, "Value is Required"],
