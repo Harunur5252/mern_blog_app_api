@@ -257,9 +257,30 @@ const addBlog = expressAsyncHandler(async (req, res) => {
   }
 });
 
+const getAllBlog = expressAsyncHandler(async (req, res) => {
+  const user = await User.findById(req?.user?._id);
+  if (!user) {
+    res.status(404);
+    throw new Error("user not found");
+  }
+  const adminRole = user?.role?.includes("admin");
+  if (adminRole) {
+    const allBlog = await Blog.find({}).sort({ createdAt: -1 });
+    if (!allBlog) {
+      res.status(404);
+      throw new Error("blogs not found");
+    }
+    return res.status(201).json(allBlog);
+  } else {
+    res.status(404);
+    throw new Error("user role not allowed");
+  }
+});
+
 module.exports = {
   addCategory,
   addTag,
+  getAllBlog,
   addBlog,
   getAllCategory,
   getAllTag,
