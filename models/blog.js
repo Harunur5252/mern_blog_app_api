@@ -6,35 +6,41 @@ const blogSchema = mongoose.Schema(
       type: String,
       required: [true, "Please enter blog title"],
       trim: true,
-      maxLength: [200, "title must be less than or equal to  200 characters"],
+      maxLength: [500, "title must be less than or equal to  500 characters"],
       unique: [true, "title Must be Unique"],
     },
     completed: {
       type: Boolean,
       default: false,
     },
-    description: {
+    descriptionOne: {
       type: String,
-      required: [true, "Please enter blog description"],
+      required: [true, "Please enter blog description one"],
       trim: true,
       maxLength: [
-        10000,
-        "description must be less than or equal to 10000 characters",
+        100000,
+        "description must be less than or equal to 100000 characters",
+      ],
+    },
+    descriptionTwo: {
+      type: String,
+      required: [true, "Please enter blog description two"],
+      trim: true,
+      maxLength: [
+        100000,
+        "description must be less than or equal to 100000 characters",
       ],
     },
     blogImg: {
       type: String,
-      required: true,
     },
     category: {
       type: String,
       trim: true,
-      required: true,
     },
     tag: {
       type: String,
       trim: true,
-      required: true,
     },
     categories: [
       {

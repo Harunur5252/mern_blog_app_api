@@ -10,6 +10,8 @@ const {
   deleteTag,
   addBlog,
   getAllBlog,
+  updateBlog,
+  deleteBlog,
 } = require("../controllers/blogOtherController");
 const requireAuth = require("../middleware/requireAuth");
 const uploadMiddleWare = require("../middleware/fileUpload");
@@ -30,5 +32,9 @@ router
 
 // blog routes
 router.post("/add/blog", requireAuth, uploadMiddleWare, addBlog);
+router
+  .route("/blog/:id")
+  .put(requireAuth, uploadMiddleWare, updateBlog)
+  .delete(requireAuth, deleteBlog);
 router.get("/all/blog", requireAuth, getAllBlog);
 module.exports = router;

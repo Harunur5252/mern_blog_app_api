@@ -6,7 +6,8 @@ const connectDB = require("./config/db/connectDB.js");
 const authRoutes = require("./routes/authRoutes.js");
 const blogAuthRoutes = require("./routes/blogAuthRoutes.js");
 const blogOtherRoutes = require("./routes/blogOtherRoutes.js");
-const { notFound, errorHandler } = require('./middleware/errorHandler.js');
+const { notFound, errorHandler } = require("./middleware/errorHandler.js");
+const blogRoutes = require("./routes/blogRoutes.js");
 
 const app = express();
 app.use(
@@ -23,6 +24,7 @@ connectDB();
 
 app.use("/api/v_1/blog/admin/panel/auth", authRoutes);
 app.use("/api/v_1/blog/auth", blogAuthRoutes);
+app.use("/api/v_1/blog", blogRoutes);
 app.use("/api/v_1/blog/admin/panel", blogOtherRoutes);
 
 app.use(notFound);

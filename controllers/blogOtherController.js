@@ -192,14 +192,14 @@ const deleteTag = expressAsyncHandler(async (req, res) => {
   }
 });
 
-// blog routes
+// add blog routes
 const addBlog = expressAsyncHandler(async (req, res) => {
-  const { title, description, category, tag, publishDate } = JSON.parse(
-    req.body?.data
-  );
+  const { title, descriptionOne, descriptionTwo, category, tag, publishDate } =
+    JSON.parse(req.body?.data);
   if (
     !title ||
-    !description ||
+    !descriptionOne ||
+    !descriptionTwo ||
     !category ||
     !tag ||
     !publishDate ||
@@ -229,14 +229,14 @@ const addBlog = expressAsyncHandler(async (req, res) => {
     }
     const blog = await Blog.create({
       title,
-      description,
+      descriptionOne,
+      descriptionTwo,
       publishDate,
       category,
       tag,
       user: user?._id,
       blogImg: req.file?.path,
     });
-    console.log(blog);
     if (!blog) {
       res.status(404);
       throw new Error("blog not found");
@@ -251,6 +251,123 @@ const addBlog = expressAsyncHandler(async (req, res) => {
     await findCategory.save();
     await findTag.save();
     return res.status(201).json(blog);
+  } else {
+    res.status(404);
+    throw new Error("user role not allowed");
+  }
+});
+
+// update blog routes
+const updateBlog = expressAsyncHandler(async (req, res) => {
+  const { title, descriptionOne, descriptionTwo, publishDate } = JSON.parse(
+    req.body?.data
+  );
+  const id = req?.params?.id;
+  const user = await User.findById(req?.user?._id);
+  if (!user) {
+    res.status(404);
+    throw new Error("user not found");
+  }
+  const adminRole = user?.role?.includes("admin");
+  if (adminRole) {
+    const blogTitleExists = await Blog.findOne({ title });
+    if (blogTitleExists) {
+      res.status(404);
+      throw new Error("blog title already exits,create new title with blog");
+    }
+    const blog = await Blog.findById(id);
+    if (!blog) {
+      res.status(404);
+      throw new Error("blog not found");
+    }
+    blog.title = title || blog?.title;
+    blog.descriptionOne = descriptionOne || blog?.descriptionOne;
+    blog.descriptionTwo = descriptionTwo || blog?.descriptionTwo;
+    blog.publishDate = publishDate || blog?.publishDate;
+    blog.blogImg = req?.file?.path || blog?.blogImg;
+    await blog.save();
+
+    return res.status(201).json(blog);
+  } else {
+    res.status(404);
+    throw new Error("user role not allowed");
+  }
+});
+
+const deleteBlog = expressAsyncHandler(async (req, res) => {
+  const id = req.params?.id;
+  if (!id) {
+    res.status(404);
+    throw new Error("blog not found");
+  }
+  const user = await User.findById(req?.user?._id);
+  if (!user) {
+    res.status(404);
+    throw new Error("user not found");
+  }
+  const adminRole = user?.role?.includes("admin");
+  if (adminRole) {
+    const blog = await Blog.findByIdAndDelete(id);
+
+    // for user
+    const findUserBlogIndex = user?.blogs?.findIndex((item, i) => {
+      if (item?.toString() === id?.toString()) {
+        return item;
+      }
+    });
+    if (findUserBlogIndex) {
+      user?.blogs?.splice(findUserBlogIndex, 1);
+      await user.save();
+    } else {
+      res.status(404);
+      throw new Error("not found");
+    }
+
+    // for category
+    const totalCategories = await Category.find({});
+    const findCategoryWiseBlog = totalCategories?.find((item) => {
+      return item?.blogs?.find((cat) => {
+        if (cat?.toString() === id?.toString()) {
+          return item;
+        }
+      });
+    });
+    const findBlogIndex = findCategoryWiseBlog?.blogs?.findIndex((item, i) => {
+      if (item?.toString() === id?.toString()) {
+        return item;
+      }
+    });
+    if (findCategoryWiseBlog && findBlogIndex) {
+      findCategoryWiseBlog?.blogs?.splice(findBlogIndex, 1);
+      await findCategoryWiseBlog.save();
+    } else {
+      res.status(404);
+      throw new Error("not found");
+    }
+
+    // for tag
+    const totalTags = await Tag.find({});
+    const findTagWiseBlog = totalTags?.find((item) => {
+      return item?.blogs?.find((tag) => {
+        if (tag?.toString() === id?.toString()) {
+          return item;
+        }
+      });
+    });
+    const findBlogIndexTwo = findTagWiseBlog?.blogs?.findIndex((item, i) => {
+      if (item?.toString() === id?.toString()) {
+        return item;
+      }
+    });
+    if (findTagWiseBlog && findBlogIndexTwo) {
+      findTagWiseBlog?.blogs?.splice(findBlogIndexTwo, 1);
+      await findTagWiseBlog.save();
+    } else {
+      res.status(404);
+      throw new Error("not found");
+    }
+
+    return res.status(200).json(blog);
   } else {
     res.status(404);
     throw new Error("user role not allowed");
@@ -279,7 +396,9 @@ const getAllBlog = expressAsyncHandler(async (req, res) => {
 
 module.exports = {
   addCategory,
+  deleteBlog,
   addTag,
+  updateBlog,
   getAllBlog,
   addBlog,
   getAllCategory,
