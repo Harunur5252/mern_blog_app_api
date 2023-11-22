@@ -76,7 +76,7 @@ const getUserProfile = expressAsyncHandler(async (req, res) => {
   const userId = req?.user?._id;
   const user = await User.findById(userId).populate({
     path: "profile",
-    select: "firstName lastName website bio image social",
+    select: "firstName lastName website bio image social resume",
   });
   // const data = {
   //   user,
@@ -226,6 +226,7 @@ const addUserProfile = expressAsyncHandler(async (req, res) => {
     firstName,
     lastName,
     website,
+    resume,
     bio,
     facebook,
     youtube,
@@ -242,6 +243,7 @@ const addUserProfile = expressAsyncHandler(async (req, res) => {
     firstName,
     lastName,
     website,
+    resume,
     bio,
     image: req?.file?.path,
     ["social.facebook"]: facebook,
@@ -271,8 +273,8 @@ const updateUserProfile = expressAsyncHandler(async (req, res) => {
     firstName,
     lastName,
     website,
+    resume,
     bio,
-    image,
     facebook,
     youtube,
     twitter,
@@ -293,6 +295,7 @@ const updateUserProfile = expressAsyncHandler(async (req, res) => {
     profile.firstName = firstName || profile?.firstName;
     profile.lastName = lastName || profile?.lastName;
     profile.website = website || profile?.website;
+    profile.resume = resume || profile?.resume;
     profile.bio = bio || profile?.bio;
     profile.image = req?.file?.path || profile?.image;
     profile.social.facebook = facebook || profile?.social?.facebook;

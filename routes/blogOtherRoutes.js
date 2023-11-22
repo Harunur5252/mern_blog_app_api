@@ -12,6 +12,10 @@ const {
   getAllBlog,
   updateBlog,
   deleteBlog,
+  blogPublished,
+  addAboutBlogy,
+  getBlogyAbout,
+  updateAboutBlogy,
 } = require("../controllers/blogOtherController");
 const requireAuth = require("../middleware/requireAuth");
 const uploadMiddleWare = require("../middleware/fileUpload");
@@ -37,4 +41,8 @@ router
   .put(requireAuth, uploadMiddleWare, updateBlog)
   .delete(requireAuth, deleteBlog);
 router.get("/all/blog", requireAuth, getAllBlog);
+router.put("/blog/published/:id", requireAuth, blogPublished);
+router.post("/add/blogy/about", requireAuth, addAboutBlogy);
+router.get("/blogy/about", requireAuth, getBlogyAbout);
+router.put("/blogy/about/:id", requireAuth, updateAboutBlogy);
 module.exports = router;

@@ -6,7 +6,10 @@ const blogCategorySchema = mongoose.Schema(
       required: true,
       unique: [true, "categoryName must be Unique"],
       trim: true,
-      maxLength: [20, "categoryName must be maximum 20 characters"],
+      maxLength: [60, "categoryName must be maximum 60 characters"],
+    },
+    categoryItem: {
+      type: String,
     },
     blogs: [
       {

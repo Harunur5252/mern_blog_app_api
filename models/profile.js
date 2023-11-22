@@ -19,6 +19,9 @@ const profileSchema = mongoose.Schema(
     bio: {
       type: String,
     },
+    resume: {
+      type: String,
+    },
     social: {
       facebook: {
         type: String,

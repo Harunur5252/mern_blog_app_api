@@ -3,9 +3,10 @@ const User = require("../models/user");
 const Category = require("../models/category");
 const Tag = require("../models/tag");
 const Blog = require("../models/blog");
+const About = require("../models/about");
 
 const addCategory = expressAsyncHandler(async (req, res) => {
-  const { categoryName } = req.body;
+  const { categoryName, categoryItem } = req.body;
   const user = await User.findById(req?.user?._id);
   if (!user) {
     res.status(404);
@@ -20,6 +21,7 @@ const addCategory = expressAsyncHandler(async (req, res) => {
     }
     const category = await Category.create({
       categoryName,
+      categoryItem,
     });
     if (!category) {
       res.status(404);
@@ -35,7 +37,6 @@ const addCategory = expressAsyncHandler(async (req, res) => {
 
 const addTag = expressAsyncHandler(async (req, res) => {
   const { tagName } = req.body;
-  console.log({ tagName });
   const user = await User.findById(req?.user?._id);
   if (!user) {
     res.status(404);
@@ -104,7 +105,7 @@ const getAllTag = expressAsyncHandler(async (req, res) => {
 
 const updateCategory = expressAsyncHandler(async (req, res) => {
   const { id } = req.params;
-  const { categoryName } = req.body;
+  const { categoryName, categoryItem } = req.body;
   const user = await User.findById(req?.user?._id);
   if (!user) {
     res.status(404);
@@ -118,6 +119,7 @@ const updateCategory = expressAsyncHandler(async (req, res) => {
       throw new Error("category not found");
     }
     categoryUpdate.categoryName = categoryName || categoryUpdate?.categoryName;
+    categoryUpdate.categoryItem = categoryItem || categoryUpdate?.categoryItem;
     await categoryUpdate.save();
     return res.status(201).json(categoryUpdate);
   } else {
@@ -394,8 +396,110 @@ const getAllBlog = expressAsyncHandler(async (req, res) => {
   }
 });
 
+const blogPublished = expressAsyncHandler(async (req, res) => {
+  const id = req.params?.id;
+  const { completed } = req.body;
+  const user = await User.findById(req?.user?._id);
+  if (!user) {
+    res.status(404);
+    throw new Error("user not found");
+  }
+  const adminRole = user?.role?.includes("admin");
+  if (adminRole) {
+    const blog = await Blog.findById(id);
+    if (!blog) {
+      res.status(404);
+      throw new Error("blog not found");
+    }
+    blog.completed = completed || blog?.completed;
+    await blog.save();
+    return res.status(201).json({
+      success: true,
+    });
+  } else {
+    res.status(404);
+    throw new Error("user role not allowed");
+  }
+});
+
+const addAboutBlogy = expressAsyncHandler(async (req, res) => {
+  const { about } = req.body;
+  const user = await User.findById(req?.user?._id);
+  if (!user) {
+    res.status(404);
+    throw new Error("user not found");
+  }
+  const adminRole = user?.role?.includes("admin");
+  if (adminRole) {
+    const blogyAbout = await About.create({
+      about,
+      user: user?._id,
+    });
+    if (!blogyAbout) {
+      res.status(404);
+      throw new Error("blogyAbout not found");
+    }
+    return res.status(201).json({
+      success: true,
+    });
+  } else {
+    res.status(404);
+    throw new Error("user role not allowed");
+  }
+});
+
+const updateAboutBlogy = expressAsyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const { about } = req.body;
+  const user = await User.findById(req?.user?._id);
+  if (!user) {
+    res.status(404);
+    throw new Error("user not found");
+  }
+  const adminRole = user?.role?.includes("admin");
+  if (adminRole) {
+    const blogyAbout = await About.findById(id);
+    if (!blogyAbout) {
+      res.status(404);
+      throw new Error("blogyAbout not found");
+    }
+    blogyAbout.about = about || blogyAbout?.about;
+    await blogyAbout.save();
+    return res.status(201).json({
+      success: true,
+    });
+  } else {
+    res.status(404);
+    throw new Error("user role not allowed");
+  }
+});
+
+const getBlogyAbout = expressAsyncHandler(async (req, res) => {
+  const user = await User.findById(req?.user?._id);
+  if (!user) {
+    res.status(404);
+    throw new Error("user not found");
+  }
+  const adminRole = user?.role?.includes("admin");
+  if (adminRole) {
+    const about = await About.find({});
+    if (!about) {
+      res.status(404);
+      throw new Error("about not found");
+    }
+    return res.status(201).json(about);
+  } else {
+    res.status(404);
+    throw new Error("user role not allowed");
+  }
+});
+
 module.exports = {
+  updateAboutBlogy,
   addCategory,
+  getBlogyAbout,
+  blogPublished,
+  addAboutBlogy,
   deleteBlog,
   addTag,
   updateBlog,
